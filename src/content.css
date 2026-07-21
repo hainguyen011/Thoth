@@ -1,0 +1,143 @@
+/* content.css - Giao diện tiêm vào trang web phong cách Google Gemini tối giản */
+
+#thoth-floating-tooltip {
+  position: absolute;
+  z-index: 2147483647 !important; /* Luôn trên cùng */
+  display: none; /* Mặc định ẩn */
+  align-items: center;
+  gap: 6px;
+  background: #1e1f20 !important;             /* Nền Gemini Surface */
+  border: 1px solid rgba(255, 255, 255, 0.04) !important; /* Viền siêu mảnh */
+  border-radius: 8px !important;              /* Bo góc nhỏ hiện đại kiểu Gemini */
+  padding: 4px 8px !important;                 /* Padding gọn nhẹ hơn */
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: border-color 0.2s ease, background-color 0.2s ease !important;
+}
+
+#thoth-floating-tooltip.idle:hover {
+  border-color: rgba(168, 199, 250, 0.4) !important; /* Xanh Google khi di chuột */
+  background: #25262a !important;
+}
+
+#thoth-floating-tooltip svg {
+  display: block;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(123, 164, 252, 0.2));
+}
+
+#thoth-floating-tooltip span {
+  color: #e3e3e3 !important;
+  font-family: 'Google Sans', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1px !important;
+  white-space: nowrap !important;
+}
+
+/* Spinner Animation */
+.thoth-spin {
+  animation: thoth-spin-keyframes 1s linear infinite !important;
+  stroke: #a8c7fa !important;                 /* Màu xanh Google */
+}
+
+@keyframes thoth-spin-keyframes {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Result Text and Action Buttons */
+.thoth-res-text {
+  color: #a8c7fa !important;                  /* Hiện kết quả bằng chữ xanh lam nhạt */
+  font-weight: 500 !important;
+  margin-right: 6px !important;
+  font-size: 12px !important;
+}
+
+.thoth-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.thoth-btn {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #c4c7c5 !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 4px !important;              /* Nút trong bo góc vuông mềm */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+.thoth-btn svg {
+  filter: none !important;
+  stroke-width: 3px !important;
+}
+
+.thoth-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #e3e3e3 !important;
+}
+
+.thoth-approve-btn:hover {
+  background: rgba(129, 199, 132, 0.12) !important;
+  border-color: #81c784 !important;            /* Đồng ý xanh lá Google */
+  color: #81c784 !important;
+}
+
+.thoth-reject-btn:hover {
+  background: rgba(242, 139, 130, 0.12) !important;
+  border-color: #f28b82 !important;            /* Từ chối đỏ nhạt Google */
+  color: #f28b82 !important;
+}
+
+/* Dual triggers layout (Phân tích & Dịch) */
+.thoth-mode-btn {
+  background: none !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  cursor: pointer !important;
+  color: #c4c7c5 !important;
+  font-family: 'Google Sans', 'Outfit', 'Inter', system-ui, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  padding: 3px 6px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.thoth-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #e3e3e3 !important;
+}
+
+.thoth-divider {
+  width: 1px !important;
+  height: 10px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Translation results container */
+.thoth-trans-container {
+  max-width: 280px !important;
+  max-height: 150px !important;
+  overflow-y: auto !important;
+  padding-right: 4px !important;
+}
+
+.thoth-trans-content {
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
+  color: #e3e3e3 !important;
+  text-align: left !important;
+  white-space: pre-wrap !important;
+}

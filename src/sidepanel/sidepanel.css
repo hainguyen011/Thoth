@@ -1,0 +1,471 @@
+/* sidepanel.css - Giao diện Thoth phong cách Google Gemini / NotebookLM cao cấp */
+:root {
+  --gemini-bg: #0f0f11;                  /* Nền ngoài cùng */
+  --gemini-surface: #1e1f20;             /* Bảng điều khiển chính */
+  --gemini-card: #2a2b2f;                /* Ô nhập / thẻ gợi ý */
+  --gemini-card-hover: #333539;          /* Trạng thái di chuột */
+  
+  --gemini-blue: #a8c7fa;                /* Xanh dương nhạt Google */
+  --gemini-blue-bg: rgba(168, 199, 250, 0.08);
+  --gemini-blue-hover: #c2e7ff;
+  
+  --text-primary: #e3e3e3;               /* Chữ chính */
+  --text-secondary: #c4c7c5;             /* Chữ phụ */
+  --text-muted: #8e918f;                 /* Nhãn chú thích */
+  
+  /* Gemini Brand Gradient cho các điểm nhấn AI */
+  --gemini-gradient: linear-gradient(135deg, #7ba4fc 0%, #b99bf8 50%, #f69fa8 100%);
+  
+  --radius-xl: 12px;                     /* Bo góc nhỏ hơn cho khung chính */
+  --radius-lg: 10px;                     /* Bo góc thẻ & ô nhập */
+  --radius-md: 8px;                      /* Bo góc vừa cho nút & khối nhỏ */
+  --radius-sm: 6px;                      /* Bo góc nhỏ cho tag & badge */
+  
+  --elevation-soft: 0 8px 32px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.16);
+  --font-family: 'Google Sans', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: var(--gemini-bg);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  display: flex;
+  flex-direction: column;
+  padding: 8px;                         /* Tạo khoảng thở ngoài cùng */
+}
+
+/* Sidebar Outer Container */
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--gemini-surface);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  gap: 20px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Viền siêu mờ thay vì viền đậm */
+}
+
+/* Custom Scrollbar Toàn Cục */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* Header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 4px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-area svg {
+  filter: drop-shadow(0 2px 8px rgba(123, 164, 252, 0.3));
+}
+
+.brand-title {
+  font-size: 16px;
+  font-weight: 500;
+  background: var(--gemini-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.1px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f28b82;
+  transition: all 0.3s ease;
+}
+
+.status-dot.connected {
+  background: #81c784;
+}
+
+/* Config Panel & Language Selector */
+.config-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selector-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--gemini-card);
+  padding: 12px 18px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.selector-row label {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+#targetLangSelect {
+  background: var(--gemini-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 12.5px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+#targetLangSelect:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+#targetLangSelect:focus {
+  border-color: var(--gemini-blue);
+}
+
+/* Context Box */
+.context-box {
+  background: var(--gemini-card);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.context-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gemini-blue);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text-btn:hover {
+  color: #f28b82;
+}
+
+#contextText {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-style: italic;
+  max-height: 80px;
+  overflow-y: auto;
+  word-break: break-word;
+  padding-right: 4px;
+}
+
+/* Input Section */
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.input-section label {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.inspect-btn {
+  background: rgba(168, 199, 250, 0.08) !important;
+  border: 1px solid rgba(168, 199, 250, 0.15) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--gemini-blue) !important;
+  font-family: var(--font-family) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  padding: 3px 8px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.inspect-btn:hover {
+  background: rgba(168, 199, 250, 0.15) !important;
+  border-color: rgba(168, 199, 250, 0.3) !important;
+}
+
+.inspect-btn.active {
+  background: rgba(242, 139, 130, 0.15) !important;
+  border-color: rgba(242, 139, 130, 0.3) !important;
+  color: #f28b82 !important;
+}
+
+.inspect-btn.selected {
+  background: rgba(129, 199, 132, 0.15) !important;
+  border-color: rgba(129, 199, 132, 0.3) !important;
+  color: #81c784 !important;
+}
+
+.textarea-wrapper {
+  position: relative;
+}
+
+#sketchInput {
+  width: 100%;
+  background: var(--gemini-card);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  padding: 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.25s;
+}
+
+#sketchInput:focus {
+  border-color: rgba(168, 199, 250, 0.4);
+  background: var(--gemini-card-hover);
+}
+
+/* Typing Loading Indicator */
+.typing-indicator {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gemini-surface);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 10.5px;
+  color: var(--gemini-blue);
+}
+
+/* Suggestions Section */
+.suggestions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.section-title-row h3 {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.lang-badge {
+  font-size: 10.5px;
+  background: var(--gemini-blue-bg);
+  color: var(--gemini-blue);
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  border: 1px solid rgba(168, 199, 250, 0.12);
+}
+
+/* Placeholder */
+.placeholder-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 36px 20px;
+  background: rgba(42, 43, 47, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.placeholder-icon {
+  font-size: 28px;
+  opacity: 0.85;
+}
+
+.placeholder-area p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 220px;
+}
+
+/* Suggestions List */
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Suggestion Card */
+.suggestion-card {
+  background: var(--gemini-card);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Elegant left accent bar corresponding to Gemini palette */
+.suggestion-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 4px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.suggestion-card[data-tone="Chuyên nghiệp"]::before { background: #ffb74d; }
+.suggestion-card[data-tone="Thân thiện"]::before { background: #81c784; }
+.suggestion-card[data-tone="Lịch sự"]::before { background: #4fc3f7; }
+.suggestion-card[data-tone="Hài hước"]::before { background: #ba68c8; }
+
+.suggestion-card:hover {
+  background: var(--gemini-card-hover);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tone-badge {
+  font-size: 10.5px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.suggestion-card[data-tone="Chuyên nghiệp"] .tone-badge { color: #ffb74d; }
+.suggestion-card[data-tone="Thân thiện"] .tone-badge { color: #81c784; }
+.suggestion-card[data-tone="Lịch sự"] .tone-badge { color: #4fc3f7; }
+.suggestion-card[data-tone="Hài hước"] .tone-badge { color: #ba68c8; }
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn:hover {
+  background: var(--gemini-blue-bg);
+  color: var(--gemini-blue);
+  border-color: rgba(168, 199, 250, 0.25);
+}
+
+.reply-text {
+  font-size: 13.5px;
+  color: var(--text-primary);
+  line-height: 1.55;
+  word-break: break-word;
+  padding-left: 4px;
+}
+
+/* Warnings */
+.warning-text {
+  font-size: 11.5px;
+  color: #f28b82;
+  background: rgba(242, 139, 130, 0.08);
+  border: 1px solid rgba(242, 139, 130, 0.15);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.hidden {
+  display: none !important;
+}

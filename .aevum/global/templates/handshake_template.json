@@ -1,0 +1,41 @@
+{
+  "version": "1.1.0",
+  "last_updated": "{{TIMESTAMP}}",
+  "servers": {
+    "{{SERVER_ID}}": {
+      "metadata": {
+        "trust_level": "experimental",
+        "provider": "{{PROVIDER_NAME}}",
+        "version": "1.0.0"
+      },
+      "competence_profile": {
+        "{{TASK_TYPE}}": {
+          "score": 0.0,
+          "executed_count": 0,
+          "avg_latency_ms": 0
+        }
+      },
+      "behavioral_patterns": [
+        {
+          "pattern_id": "{{PATTERN_ID}}",
+          "description": "{{PATTERN_DESC}}",
+          "resonance_score": 0.0,
+          "last_applied": "{{TIMESTAMP}}"
+        }
+      ],
+      "performance_metrics": {
+        "overall_success_rate": 0.0,
+        "token_efficiency": 0.0,
+        "incident_count": 0
+      },
+      "relationship_score": 0.5,
+      "last_handshake": "{{TIMESTAMP}}",
+      "incident_log": []
+    }
+  },
+  "global_patterns": [],
+  "shared_context_policy": {
+    "default_access_level": "read_only",
+    "forbidden_keys": ["api_keys", "passwords", "private_tokens"]
+  }
+}

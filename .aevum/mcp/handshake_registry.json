@@ -1,0 +1,10 @@
+{
+  "version": "1.1.0",
+  "last_updated": "2026-05-23T20:50:00Z",
+  "servers": {},
+  "global_patterns": [],
+  "shared_context_policy": {
+    "default_access_level": "read_only",
+    "forbidden_keys": ["api_keys", "passwords", "private_tokens"]
+  }
+}

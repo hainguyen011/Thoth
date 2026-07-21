@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "lastTransactionId": "tx_edge_1784627476039_lao2e",
+  "nodes": [
+    {
+      "id": "aevum://lesson/1784626858183_7f0",
+      "type": "LESSON",
+      "label": "Lesson from init_extension_and_ui_plan.md",
+      "properties": {
+        "description": "Khi phát triển Chrome Extension trên môi trường bị giới hạn câu lệnh CMD/Powershell, giải pháp dùng Vanilla JS/HTML/CSS không cần build là phương án tối ưu nhất giúp người dùng dễ dàng cài đặt thông qua Load Unpacked. Cần dispatch đầy đủ sự kiện 'input' và 'change' sau khi cập nhật value của ô nhập liệu trên trang web để các thư viện frontend như React/Vue nhận diện và lưu trạng thái.",
+        "author": "An",
+        "date": "2026-07-21T09:40:58.184Z",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "id": "aevum://plan/init_extension_and_ui_plan",
+      "type": "PLAN",
+      "label": "init_extension_and_ui_plan.md",
+      "properties": {
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "id": "aevum://lesson/1784627476013_yza",
+      "type": "LESSON",
+      "label": "Lesson from init_extension_and_ui_plan.md",
+      "properties": {
+        "description": "Tách biệt phần giao diện UI (biên dịch bằng Vite + React) và phần logic ngầm (Background Service Worker, Content Script - sao chép trực tiếp) giúp tránh hoàn toàn các lỗi xung đột ESM/IIFE trong môi trường Chrome Extension, đồng thời tăng tính mô-đun hóa qua JSX.",
+        "author": "An",
+        "date": "2026-07-21T09:51:16.014Z",
+        "status": "ACTIVE"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "aevum://plan/init_extension_and_ui_plan",
+      "target": "aevum://lesson/1784626858183_7f0",
+      "type": "hasLesson"
+    },
+    {
+      "source": "aevum://plan/init_extension_and_ui_plan",
+      "target": "aevum://lesson/1784627476013_yza",
+      "type": "hasLesson"
+    }
+  ]
+}
