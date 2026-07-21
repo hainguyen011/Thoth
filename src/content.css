@@ -141,3 +141,62 @@
   text-align: left !important;
   white-space: pre-wrap !important;
 }
+
+/* Header of result modal */
+.thoth-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding-bottom: 6px !important;
+  margin-bottom: 6px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  width: 100% !important;
+}
+
+.thoth-modal-title {
+  font-family: 'Google Sans', 'Outfit', 'Inter', system-ui, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: #a8c7fa !important;
+  white-space: nowrap !important;
+}
+
+/* Flex rules when result state is active */
+#thoth-floating-tooltip.translation-result,
+#thoth-floating-tooltip.summary-result {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  padding: 8px 10px !important;
+  width: 290px !important;
+}
+
+/* Bullet list and formatting styling */
+.thoth-bullet-line {
+  margin-left: 6px !important;
+  margin-top: 4px !important;
+  text-indent: -8px !important;
+  padding-left: 8px !important;
+  line-height: 1.4 !important;
+}
+
+.thoth-empty-line {
+  height: 4px !important;
+}
+
+.thoth-original-text {
+  border-left: 2px solid rgba(168, 199, 250, 0.3) !important;
+  padding-left: 6px !important;
+  margin-bottom: 8px !important;
+  font-style: italic !important;
+  color: #9aa0a6 !important;
+  font-size: 11px !important;
+  max-height: 40px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  line-height: 1.4 !important;
+}

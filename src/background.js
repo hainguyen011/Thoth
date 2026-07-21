@@ -39,6 +39,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true; // Giữ kết nối async
   }
 
+  if (message.type === "SUMMARIZE_TEXT") {
+    handleSummarizeText(message.text)
+      .then(result => sendResponse({ success: true, summaryText: result }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true; // Giữ kết nối async
+  }
+
+  if (message.type === "EXPLORE_CONTEXT") {
+    handleExploreContext(message.text, message.contextType)
+      .then(result => sendResponse({ success: true, badgeText: result }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true; // Giữ kết nối async
+  }
+
   if (message.type === "GENERATE_SUGGESTIONS") {
     handleGenerateSuggestions(message.text, message.targetLang, message.targetLangCode)
       .then(result => sendResponse({ success: true, suggestions: result }))
@@ -147,6 +161,44 @@ Original text:
 ${text}`;
 
   const responseText = await callGemini(prompt, false); // Response JSON is false since we want flat text
+  return responseText.trim();
+}
+
+// Xử lý tóm tắt & giải nghĩa đoạn văn bản bôi đen theo phong cách ngôn ngữ mẹ đẻ dễ hiểu
+async function handleSummarizeText(text) {
+  const settings = await chrome.storage.local.get(["nativeLanguage", "nativeLanguageCode"]);
+  const targetLang = settings.nativeLanguage || "Vietnamese";
+  const targetLangCode = settings.nativeLanguageCode || "vi";
+
+  const prompt = `You are Thoth, a highly sophisticated AI assistant.
+Provide a very short, ultra-concise, and extremely simple summary and explanation of the following text in ${targetLang}.
+Your goal is to make it as easy to understand as possible, using natural everyday language (like explaining to a friend).
+Use bold text (**bold**) for key terms. Keep the entire response under 3 short bullet points (using "- ") or a single short paragraph.
+Do not write any introductory or concluding remarks.
+
+Text to summarize:
+${text}`;
+
+  const responseText = await callGemini(prompt, false);
+  return responseText.trim();
+}
+
+// Xử lý phân tích thêm ngữ cảnh dựa trên badge được chọn
+async function handleExploreContext(text, contextType) {
+  const settings = await chrome.storage.local.get(["nativeLanguage", "nativeLanguageCode"]);
+  const targetLang = settings.nativeLanguage || "Vietnamese";
+  const targetLangCode = settings.nativeLanguageCode || "vi";
+
+  const prompt = `You are Thoth, a highly sophisticated AI language assistant.
+Explain the meaning and usage of the following text specifically from the perspective of: "${contextType}".
+Explain it in ${targetLang} (ISO code: ${targetLangCode}) in a single, very short and concise paragraph (1-2 sentences max).
+Use natural everyday language. Use bold text (**bold**) for key terms.
+Do not write any introductory or concluding remarks.
+
+Text to analyze:
+${text}`;
+
+  const responseText = await callGemini(prompt, false);
   return responseText.trim();
 }
 

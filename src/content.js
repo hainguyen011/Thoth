@@ -8,6 +8,7 @@ let inspectOverlay = null;
 let currentHoveredEl = null;
 let selectedElement = null;
 let selectedOverlay = null;
+let currentSummaryMarkdown = "";
 
 // Helper kiểm tra xem extension context còn hiệu lực hay không
 function isContextValid() {
@@ -194,6 +195,22 @@ function createTooltip() {
       return;
     }
 
+    // Nếu click vào nút Tóm tắt ở trạng thái idle
+    const summaryTrigger = e.target.closest(".thoth-summary-trigger");
+    if (summaryTrigger) {
+      e.stopPropagation();
+      startSummary();
+      return;
+    }
+
+    // Nếu click vào một badge gợi ý nghĩa khác
+    const badgeBtn = e.target.closest(".thoth-badge-btn");
+    if (badgeBtn) {
+      e.stopPropagation();
+      handleBadgeClick(badgeBtn);
+      return;
+    }
+
     // Nếu người dùng click vào nút Approve (✓) ở trạng thái kết quả phân tích
     const approveBtn = e.target.closest(".thoth-approve-btn");
     if (approveBtn) {
@@ -247,6 +264,75 @@ function createTooltip() {
   });
 }
 
+// Xử lý khi click vào badge gợi ý nghĩa khác
+function handleBadgeClick(badgeBtn) {
+  const badgeType = badgeBtn.getAttribute("data-badge");
+  const textEl = tooltipElement.querySelector(".thoth-trans-content");
+  const containerEl = tooltipElement.querySelector(".thoth-trans-container");
+  const badgesTitle = tooltipElement.querySelector(".thoth-badges-title");
+  
+  if (!textEl) return;
+
+  // Hiển thị trạng thái loading ở cuối nội dung tóm tắt
+  const loadingEl = document.createElement("div");
+  loadingEl.className = "thoth-badge-loading";
+  loadingEl.innerHTML = `<svg class="thoth-spin" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="cyan" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Đang phân tích ${badgeType}...`;
+  textEl.appendChild(loadingEl);
+  
+  if (containerEl) {
+    containerEl.scrollTop = containerEl.scrollHeight;
+  }
+
+  // Tạm thời vô hiệu hoá các badge khác
+  const allBadges = tooltipElement.querySelectorAll(".thoth-badge-btn");
+  allBadges.forEach(b => b.disabled = true);
+
+  chrome.runtime.sendMessage({
+    type: "EXPLORE_CONTEXT",
+    text: lastSelectedText,
+    contextType: badgeType
+  }, (response) => {
+    if (!isContextValid()) {
+      cleanupInvalidatedContext();
+      return;
+    }
+
+    loadingEl.remove();
+    allBadges.forEach(b => b.disabled = false);
+
+    if (chrome.runtime.lastError || !response || !response.success) {
+      console.warn("Lỗi phân tích thêm nghĩa: ", chrome.runtime.lastError || response?.error);
+      return;
+    }
+
+    // Nối thêm nội dung vào buffer
+    currentSummaryMarkdown += `\n\n**${badgeType}**:\n${response.badgeText}`;
+    
+    // Cập nhật lại khung hiển thị
+    textEl.innerHTML = parseMarkdown(currentSummaryMarkdown);
+    
+    // Cuộn xuống cuối để thấy phần nội dung mới
+    if (containerEl) {
+      containerEl.scrollTop = containerEl.scrollHeight;
+    }
+
+    // Cập nhật giá trị nút Copy
+    const copyBtn = tooltipElement.querySelector(".thoth-copy-btn");
+    if (copyBtn) {
+      copyBtn.setAttribute("data-trans", currentSummaryMarkdown.replace(/"/g, '&quot;'));
+    }
+
+    // Ẩn badge đã dùng
+    badgeBtn.style.display = "none";
+    
+    // Nếu đã dùng hết các badge, ẩn tiêu đề badges
+    const visibleBadges = Array.from(allBadges).filter(b => b.style.display !== "none");
+    if (visibleBadges.length === 0 && badgesTitle) {
+      badgesTitle.style.display = "none";
+    }
+  });
+}
+
 // Bắt đầu gọi phân tích ngôn ngữ bằng AI
 function startAnalysis() {
   setTooltipState("analyzing");
@@ -294,6 +380,58 @@ function startTranslation() {
   });
 }
 
+// Bắt đầu gọi tóm tắt & giải nghĩa bằng AI sang ngôn ngữ mẹ đẻ
+function startSummary() {
+  setTooltipState("summarizing");
+
+  chrome.runtime.sendMessage({
+    type: "SUMMARIZE_TEXT",
+    text: lastSelectedText
+  }, (response) => {
+    if (!isContextValid()) {
+      cleanupInvalidatedContext();
+      return;
+    }
+
+    if (chrome.runtime.lastError || !response || !response.success) {
+      console.warn("Lỗi tóm tắt văn bản: ", chrome.runtime.lastError || response?.error);
+      setTooltipState("idle");
+      return;
+    }
+
+    setTooltipState("summary-result", { summaryText: response.summaryText });
+  });
+}
+
+// Hàm chuyển đổi Markdown cơ bản sang HTML an toàn
+function parseMarkdown(text) {
+  if (!text) return "";
+  
+  // Tránh các ký tự HTML nguy hiểm
+  let html = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+    
+  // 1. Chuyển đổi in đậm **text** -> <strong>text</strong>
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  
+  // 2. Chuyển đổi in nghiêng *text* -> <em>$1</em>
+  html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+  
+  // 3. Chuyển đổi danh sách gạch đầu dòng: xuống dòng + "-" hoặc "*" thành chấm tròn thụt đầu dòng
+  const lines = html.split("\n");
+  const formattedLines = lines.map(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      return `<div class="thoth-bullet-line">• ${trimmed.substring(2)}</div>`;
+    }
+    return trimmed ? `<div>${trimmed}</div>` : `<div class="thoth-empty-line"></div>`;
+  });
+  
+  return formattedLines.join("");
+}
+
 // Thiết lập nội dung HTML và Class cho từng trạng thái của tooltip
 function setTooltipState(state, data = {}) {
   if (!tooltipElement) return;
@@ -309,6 +447,10 @@ function setTooltipState(state, data = {}) {
       <button class="thoth-mode-btn thoth-translate-trigger" title="Dịch sang ngôn ngữ mẹ đẻ">
         <span>Dịch</span>
       </button>
+      <div class="thoth-divider"></div>
+      <button class="thoth-mode-btn thoth-summary-trigger" title="Tóm tắt & giải nghĩa dễ hiểu">
+        <span>Tóm tắt</span>
+      </button>
     `;
   } else if (state === "analyzing") {
     tooltipElement.innerHTML = `
@@ -319,6 +461,11 @@ function setTooltipState(state, data = {}) {
     tooltipElement.innerHTML = `
       <svg class="thoth-spin" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="cyan" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       <span>Đang dịch...</span>
+    `;
+  } else if (state === "summarizing") {
+    tooltipElement.innerHTML = `
+      <svg class="thoth-spin" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="cyan" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      <span>Đang tóm tắt...</span>
     `;
   } else if (state === "result") {
     tooltipElement.innerHTML = `
@@ -334,18 +481,49 @@ function setTooltipState(state, data = {}) {
     `;
   } else if (state === "translation-result") {
     tooltipElement.innerHTML = `
-      <div class="thoth-trans-container">
-        <div class="thoth-trans-content">${data.translatedText}</div>
+      <div class="thoth-modal-header">
+        <span class="thoth-modal-title">Dịch thuật</span>
+        <div class="thoth-actions">
+          <button class="thoth-btn thoth-copy-btn" data-trans="${data.translatedText.replace(/"/g, '&quot;')}" title="Sao chép kết quả">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="thoth-btn thoth-close-btn" title="Đóng">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
       </div>
-      <div class="thoth-actions">
-        <button class="thoth-btn thoth-copy-btn" data-trans="${data.translatedText.replace(/"/g, '&quot;')}" title="Sao chép kết quả">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        </button>
-        <button class="thoth-btn thoth-close-btn" title="Đóng">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
+      <div class="thoth-trans-container">
+        <div class="thoth-trans-content">${parseMarkdown(data.translatedText)}</div>
       </div>
     `;
+  } else if (state === "summary-result") {
+    tooltipElement.innerHTML = `
+      <div class="thoth-modal-header">
+        <span class="thoth-modal-title">Tóm tắt & Giải nghĩa</span>
+        <div class="thoth-actions">
+          <button class="thoth-btn thoth-copy-btn" data-trans="${data.summaryText.replace(/"/g, '&quot;')}" title="Sao chép kết quả">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="thoth-btn thoth-close-btn" title="Đóng">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="thoth-trans-container">
+        <div class="thoth-original-text">“${lastSelectedText}”</div>
+        <div class="thoth-trans-content">${parseMarkdown(data.summaryText)}</div>
+        <div class="thoth-badges-title">Xem góc nhìn khác:</div>
+        <div class="thoth-badges-row">
+          <button class="thoth-badge-btn" data-badge="Nghĩa bóng">Nghĩa bóng</button>
+          <button class="thoth-badge-btn" data-badge="Hài hước">Hài hước</button>
+          <button class="thoth-badge-btn" data-badge="Tiếng lóng">Tiếng lóng</button>
+          <button class="thoth-badge-btn" data-badge="Trang trọng">Trang trọng</button>
+        </div>
+      </div>
+    `;
+    tooltipElement.querySelectorAll(".thoth-badge-btn").forEach(btn => {
+      btn.addEventListener("click", handleBadgeClick);
+    });
   }
 }
 
@@ -354,6 +532,7 @@ function hideTooltip() {
   if (tooltipElement) {
     tooltipElement.style.display = "none";
   }
+  currentSummaryMarkdown = "";
 }
 
 // 3. Lắng nghe yêu cầu chèn bình luận từ Side Panel
